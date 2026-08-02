@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Junket PR 新人入门测试</title>
+    <style>
+        /* ===== 所有 CSS ===== */
+        * { box-sizing:border-box; margin:0; padding:0; }
+        body { font-family:"PingFang SC",sans-serif; background:#f4f6fa; padding:20px; display:flex; justify-content:center; }
+        .container { max-width:820px; width:100%; background:#fff; border-radius:24px; padding:32px 30px 40px; box-shadow:0 12px 40px rgba(0,0,0,0.08); }
+        .header { text-align:center; border-bottom:2px solid #eef1f5; padding-bottom:20px; margin-bottom:28px; }
+        .header h1 { font-size:26px; font-weight:700; color:#1a2634; }
+        .header .sub { color:#7b8a9b; font-size:15px; }
+        .header .badge { display:inline-block; background:#1a2634; color:#fff; font-size:13px; padding:2px 16px; border-radius:30px; margin-top:8px; }
+        .progress-area { display:flex; justify-content:space-between; align-items:center; background:#f0f3f7; padding:12px 18px; border-radius:50px; margin-bottom:28px; font-size:14px; flex-wrap:wrap; gap:8px; }
+        .progress-track { flex:1; min-width:100px; height:6px; background:#dde2e9; border-radius:10px; overflow:hidden; }
+        .progress-fill { height:100%; width:0%; background:#2b7be4; border-radius:10px; transition:width 0.35s; }
+        .question-card { display:none; animation:fadeUp 0.3s; }
+        .question-card.active { display:block; }
+        @keyframes fadeUp { 0%{opacity:0;transform:translateY(16px)} 100%{opacity:1;transform:translateY(0)} }
+        .q-number { font-size:14px; font-weight:600; color:#2b7be4; background:#e9eff9; display:inline-block; padding:2px 14px; border-radius:30px; margin-bottom:12px; }
+        .q-title { font-size:20px; font-weight:600; color:#0b1a2a; line-height:1.6; margin-bottom:20px; }
+        .options { display:flex; flex-direction:column; gap:10px; margin-bottom:18px; }
+        .option-btn { background:#f7f9fc; border:2px solid #e4e9f0; border-radius:14px; padding:14px 20px; font-size:16px; font-weight:500; color:#1f2a36; cursor:pointer; transition:0.15s; text-align:left; display:flex; align-items:center; gap:12px; font-family:inherit; }
+        .option-btn:hover:not(.disabled-opt) { background:#eef3fe; border-color:#b3c9f0; }
+        .option-btn .tag { min-width:28px; font-weight:700; color:#6a7e94; }
+        .option-btn.correct { background:#dff0d8; border-color:#2d8f4e; }
+        .option-btn.wrong { background:#f8e1e1; border-color:#c73b3b; }
+        .option-btn.reveal-correct { background:#dff0d8; border-color:#2d8f4e; }
+        .option-btn.disabled-opt { cursor:default; opacity:0.85; }
+        .insight-box { background:#f2f6fe; border-left:6px solid #2b7be4; border-radius:16px; padding:18px 22px; margin-top:16px; display:none; animation:fadeUp 0.3s; }
+        .insight-box.show { display:block; }
+        .insight-box .correct-answer { font-weight:700; font-size:17px; color:#124b2b; margin-bottom:6px; }
+        .insight-box .correct-answer span { background:#2d8f4e; color:#fff; padding:0 12px; border-radius:30px; font-size:14px; margin-left:6px; }
+        .insight-box .my-insight { color:#1f3348; line-height:1.7; font-size:15px; }
+        .nav-area { display:flex; justify-content:space-between; margin-top:28px; gap:12px; flex-wrap:wrap; }
+        .btn { background:#eef2f7; border:none; padding:12px 28px; border-radius:40px; font-weight:600; font-size:15px; color:#2c3e50; cursor:pointer; transition:0.15s; font-family:inherit; }
+        .btn-primary { background:#1a2634; color:#fff; }
+        .btn-primary:hover:not(:disabled) { background:#2c3e50; }
+        .btn-primary:disabled { opacity:0.4; cursor:not-allowed; }
+        .btn-success { background:#2d8f4e; color:#fff; }
+        .btn-success:hover { background:#1f7a3e; }
+        .btn-outline { background:transparent; border:2px solid #d0d8e2; }
+        .btn-outline:disabled { opacity:0.3; cursor:not-allowed; }
+        .result-box { display:none; text-align:center; padding:30px 10px 10px; }
+        .result-box .big-score { font-size:58px; font-weight:800; color:#1a2634; }
+        .result-box .big-score small { font-size:24px; color:#7b8a9b; }
+        .result-box .msg { font-size:18px; color:#2c3e50; margin:16px 0 24px; }
+        .result-box .stars { font-size:34px; letter-spacing:6px; }
+        .result-review { margin-top:30px; text-align:left; border-top:3px solid #eef1f5; padding-top:30px; }
+        .result-review h2 { font-size:22px; color:#1a2634; margin-bottom:20px; text-align:center; }
+        .review-item { background:#f8f9fc; border-radius:16px; padding:20px 22px; margin-bottom:16px; border-left:6px solid #2d8f4e; transition:all 0.2s; }
+        .review-item.wrong { border-left-color:#c73b3b; background:#fdf6f6; }
+        .review-item .review-q { font-weight:600; font-size:16px; color:#0b1a2a; margin-bottom:10px; }
+        .review-item .review-q .q-badge { font-size:13px; font-weight:700; padding:2px 12px; border-radius:30px; margin-left:10px; }
+        .review-item .review-q .q-badge.correct-badge { background:#dff0d8; color:#2d8f4e; }
+        .review-item .review-q .q-badge.wrong-badge { background:#f8e1e1; color:#c73b3b; }
+        .review-item .review-options { display:flex; flex-direction:column; gap:6px; margin:8px 0; }
+        .review-item .review-opt { font-size:15px; padding:6px 14px; border-radius:8px; display:inline-block; width:fit-content; }
+        .review-item .review-opt.opt-correct { background:#dff0d8; color:#1f7a3e; font-weight:600; }
+        .review-item .review-opt.opt-wrong { background:#f8e1e1; color:#c73b3b; font-weight:600; border:2px solid #c73b3b; }
+        .review-item .review-opt.opt-normal { color:#4a5a6a; }
+        .review-item .review-answer-line { margin-top:8px; padding-top:8px; border-top:1px dashed #e0e5ec; font-size:15px; }
+        .review-item .review-answer-line .label { font-weight:600; color:#6a7e94; }
+        .review-item .review-answer-line .your-ans { color:#c73b3b; font-weight:700; background:#f8e1e1; padding:2px 12px; border-radius:6px; }
+        .review-item .review-answer-line .correct-ans { color:#2d8f4e; font-weight:700; background:#dff0d8; padding:2px 12px; border-radius:6px; }
+        .review-item .review-answer-line .right-mark { color:#2d8f4e; font-weight:700; }
+        .review-item .review-answer-line .wrong-mark { color:#c73b3b; font-weight:700; }
+        @media (max-width:600px){ .container{ padding:20px 16px; } .q-title{ font-size:18px; } .option-btn{ font-size:15px; padding:12px 16px; } .nav-area .btn{ padding:10px 18px; font-size:14px; } .header h1{ font-size:22px; } .review-item { padding: 16px; } }
+    </style>
+</head>
+<body>
+<div class="container" id="app">
+    <div class="header">
+        <h1>🎯 Junket PR · 新人入门测试</h1>
+        <div class="sub">10 道不能不知道的事 · 选完即看解析</div>
+        <div class="badge">⏳ 约 8 分钟完成</div>
+    </div>
+    <div class="progress-area">
+        <span class="progress-text" id="progressLabel">第 1 / 10 题</span>
+        <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%;"></div></div>
+        <span id="scoreLabel" style="font-weight:600;color:#2b7be4;">✅ 0 正确</span>
+    </div>
+    <div id="questionsWrapper"></div>
+    <div class="nav-area" id="navArea">
+        <button class="btn btn-outline" id="prevBtn" disabled>← 上一题</button>
+        <button class="btn btn-primary" id="nextBtn">下一题 →</button>
+    </div>
+    <div class="result-box" id="resultBox">
+        <div class="stars" id="resultStars">⭐⭐⭐</div>
+        <div class="big-score" id="resultScore">0 <small>/ 10</small></div>
+        <div class="msg" id="resultMsg">继续加油！</div>
+        <button class="btn btn-success" id="restartBtn" style="margin-top:8px;padding:14px 40px;font-size:17px;">🔄 重新测试</button>
+        <div class="result-review" id="resultReview"></div>
+    </div>
+</div>
+<script>
+// ====== 所有 JavaScript ======
+const questions = [{
+    id:1, title:'在Junket行业做PR，以下哪个选项最准确地描述了你的核心服务对象？',
+    options:['所有来旅游观光的普通游客','能带来高额流水和持续贡献的VIP高端客户','赌场内所有需要帮助的荷官和工作人员','酒店内其他非博彩部门的同事'],
+    correct:1, insight:'选A的新人常犯的错误是把PR当成了"大众导游"，但Junket行业的资源（信贷额度、免费套房、专车接送）都是极其昂贵的，尽可能精准投放到高价值客户身上。选C或D则完全搞错了对象，你的KPI跟工作人员无关。记住：你的所有精力，都要聚焦在"20%贡献80%利润"的那批VIP身上。'
+},{
+    id:2, title:'在通常情况下，一个人的名字在同一天里面最多可以预定多少间房间？',
+    options:['一间','两间','四间','三间'],
+    correct:2, insight:'在通常情况下一个人的名字同一天里面最多可以预定四间房间，如有特殊情况获得Special Apporval才有机会预定超过四间'
+},{
+    id:3, title:'当你做PR有两组客人需要找你时候可以怎么做？',
+    options:['直接私人联系其中一位同事出来帮忙','联系掌码说明情况，需要一位同事协助','先处理其中一组客人，另外一组就让他们等','叫两组客人meet一起来找你处理问题'],
+    correct:1, insight:'选C和D都是在被骂边缘疯狂试探，一旦出事，PR本人要负极大责任，绝对不是"公司兜底"。选A是不妥当的想法，因为厅里除了PANAL A最大的就是掌码，他需要知道所有同事的动向 如有任何需要协助时请优先联系掌码，他会安排最适合的同事来协助。'
+},{
+    id:4, title:'以下哪个行为最能体现PR在服务细节上的专业性？',
+    options:['每次接待时都按标准化流程走，对所有客户一视同仁','提前记录并主动复用到客户的忌口、房型偏好和接送习惯','重点把"码粮"返点计算清楚即可，生活喜好不重要','客户问什么答什么，不需要提前做功课'],
+    correct:1, insight:'选A的误区在于忽略了VIP最讨厌"被标准化对待"，他们要的是"被特殊照顾的感觉"。选C和D则完全没有服务意识。这行的服务哲学是：做客户的"私人管家"而不是"客服机器人"。比如记住他上次抱怨过空调太冷，这次提前调好温度，一个细节就能让他记住你。'
+},{
+    id:5, title:'关于看见有新的客人条件出现时PR需要做些什么事前准备？',
+    options:['不关PR事情因为没有关于PR的事情','PR只需要会跟客人聊天就行，出码那些是Floor同事的事所以不予理会','PR也是必须去检查客人是否under我们Group，是否拥有Pre Apporval 1M.3M.10M以及开通IGP和预计到达时间','等客人到了在门口迎接就行'],
+    correct:2, insight:'提前准备好转group，IGP，以及通知同事们ETA是非常重要的事情，尤其是VVIP客人，特别是VVIP客人感到不适不愿意在我们这边开工时就是非常严重的事故了'
+},{
+    id:6, title:'在Junket行业，以下哪种"人脉维护"方式是最有效且专业的？',
+    options:['每天群发节日祝福，把微信好友都覆盖到','只在客户赌输了需要安慰时才主动联系','建立个人客户档案，记录生日、家庭、商务行程，并精准投送问候或小礼物','只要有新客户就马上邀请来赌场，不管他方不方便'],
+    correct:2, insight:'选A是无效社交，群发消息客户根本不会看。选B属于"负面情绪绑定"，客户看到你就想起输钱，会越来越躲着你。选D太过急功近利，会引起反感。真正的维护是"日常有温度，关键节点有惊喜"——比如他朋友圈发了孩子生日，你寄个小礼物过去，比发一百条祝福都管用。'
+},{
+    id:7, title:'当你的VIP客户在赌场一夜之间输掉一大笔钱，情绪非常暴躁，此时你最不应该做的事是什么？',
+    options:['保持职业冷静，安抚情绪，但不做过多的财务建议','立即安排车辆和休息，让客户先离开现场冷静','因害怕失去客户而表现出极度的焦虑和慌张','在客户情绪稳定后，关心他的身体状况'],
+    correct:2, insight:'选C是新人最容易犯的错——把自己的焦虑写在脸上。客户输钱后最讨厌看到PR比他更慌张，那会让他觉得"这人靠不住，我的钱是不是出问题了？"记住：你是客户的"情绪稳定器"，而不是"情绪放大器"。平静、专业、给予空间，才是正确的处理方式。'
+},{
+    id:8, title:'Check in 75k可以预定哪里的云顶limo？',
+    options:['任意全马任何地点都能去','北上超过Kuala Kangsar 南下超过MUAR需要Table Rolling over 300K在这两个地点之间只需要75K就行','只能预定KL以及机场的其他不能预定','Check in 75K没有得使用云顶limo'],
+    correct:1, insight:'选A的误区在于，不是任何地点都能去，预定是必须检查好客人的Table Rolling是否足够cover Penang，Johor或者新加坡的limo，如新人PR不确定情况下可以联系Logistic获得最新资讯'
+},{
+    id:9, title:'以下哪个行为严重违反了Junket行业PR的保密义务？',
+    options:['在公司内部上汇报客户的接待情况','与财务部门核对客户的码粮结算数据','在朋友聚会时，闲聊某位大客户的私人行程和输赢情况','在客户允许的情况下，帮他预订餐厅'],
+    correct:2, insight:'选A和B是正常的工作沟通，不涉及对外泄露。选D是经客户授权的正常服务。而选C是这行绝对的死罪。客户的私人行程、输赢金额、家庭状况，对外透露半个字，轻则被公司开除，重则被整个行业拉黑。记住：客户的隐私比你的名片还重要，嘴严是PR入行的基本素养。'
+},{
+    id:10, title:'当客人在群里询问关于云顶房间时PR需要怎么做？',
+    options:['先忙手里事情，得空了才回复','立即在3分钟里面回复客人，了解清楚客人需要什么帮忙','当没有看到，心情好是才回复','等着公司其他人回复，PR只负责接客人'],
+    correct:1, insight:'公司SPO PR需要三分钟里面回复客人的信息，就算真的在忙无法立即完成客人委托或者需求，可以礼貌性回复稍等一会我们去查看，至少让客人知道有人在关注着而不是感到没人理会'
+}];
+
+let currentIndex = 0;
+let answers = questions.map(() => ({ selected: null, answered: false }));
+let score = 0;
+let isAllAnswered = false;
+
+const wrapper = document.getElementById('questionsWrapper');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const navArea = document.getElementById('navArea');
+const progressLabel = document.getElementById('progressLabel');
+const progressFill = document.getElementById('progressFill');
+const scoreLabel = document.getElementById('scoreLabel');
+const resultBox = document.getElementById('resultBox');
+const resultReview = document.getElementById('resultReview');
+const restartBtn = document.getElementById('restartBtn');
+
+function renderAll() {
+    let html = '';
+    for (let i = 0; i < questions.length; i++) {
+        const active = (i === currentIndex) ? 'active' : '';
+        const q = questions[i];
+        const data = answers[i];
+        const isAnswered = data.answered;
+        const labels = ['A', 'B', 'C', 'D'];
+        let card = '<div class="question-card ' + active + '" id="qcard-' + i + '"><div class="q-number">第 ' + (i + 1) + ' / ' + questions.length + ' 题</div><div class="q-title">' + q.title + '</div><div class="options">';
+        q.options.forEach((opt, idx) => {
+            let cls = 'option-btn';
+            if (isAnswered) {
+                cls += ' disabled-opt';
+                if (idx === q.correct) cls += ' reveal-correct';
+                else if (idx === data.selected && idx !== q.correct) cls += ' wrong';
+                if (idx === data.selected && idx === q.correct) cls += ' correct';
+            }
+            card += '<button class="' + cls + '" data-optindex="' + idx + '" data-qindex="' + i + '" ' + (isAnswered ? 'disabled' : '') + '><span class="tag">' + labels[idx] + '.</span> ' + opt + '</button>';
+        });
+        card += '</div>';
+        let insight = '';
+        if (isAnswered) {
+            const isCorrect = (data.selected === q.correct);
+            insight = '<div class="insight-box show"><div class="correct-answer">✅ 正确答案：' + labels[q.correct] + ' <span>' + (isCorrect ? '✔ 你选对了！' : '✘ 再记牢一点') + '</span></div><div class="my-insight"><strong>💡 我的见解：</strong>' + q.insight + '</div></div>';
+        } else {
+            insight = '<div class="insight-box" id="insight-' + i + '"></div>';
+        }
+        card += insight + '</div>';
+        html += card;
+    }
+    wrapper.innerHTML = html;
+    document.querySelectorAll('.option-btn:not([disabled])').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const qIdx = parseInt(this.dataset.qindex);
+            const optIdx = parseInt(this.dataset.optindex);
+            handleOptionClick(qIdx, optIdx);
+        });
+    });
+    updateProgressAndScore();
+    updateNavButtons();
+}
+
+function handleOptionClick(qIdx, optIdx) {
+    if (answers[qIdx].answered) return;
+    const q = questions[qIdx];
+    answers[qIdx].selected = optIdx;
+    answers[qIdx].answered = true;
+    if (optIdx === q.correct) score += 1;
+    isAllAnswered = answers.every(a => a.answered === true);
+    renderAll();
+    if (isAllAnswered) {
+        currentIndex = questions.length - 1;
+        renderAll();
+        document.querySelector('.question-card.active').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}
+
+function goToPrev() {
+    if (currentIndex > 0) {
+        currentIndex--;
+        renderAll();
+    }
+}
+
+function goToNext() {
+    if (isAllAnswered && currentIndex === questions.length - 1) {
+        showResult();
+        return;
+    }
+    if (!answers[currentIndex].answered) return;
+    if (currentIndex < questions.length - 1) {
+        currentIndex++;
+        renderAll();
+    }
+}
+
+function updateNavButtons() {
+    const isLast = (currentIndex === questions.length - 1);
+    const currentAnswered = answers[currentIndex].answered;
+    prevBtn.disabled = (currentIndex === 0);
+    if (isAllAnswered && isLast) {
+        nextBtn.textContent = '📊 查看结果';
+        nextBtn.className = 'btn btn-success';
+        nextBtn.disabled = false;
+        return;
+    }
+    if (isLast && !currentAnswered) {
+        nextBtn.textContent = '完成';
+        nextBtn.className = 'btn btn-primary';
+        nextBtn.disabled = true;
+        return;
+    }
+    nextBtn.textContent = isLast ? '完成' : '下一题 →';
+    nextBtn.className = 'btn btn-primary';
+    nextBtn.disabled = !currentAnswered;
+}
+
+function updateProgressAndScore() {
+    const total = questions.length;
+    const answeredCount = answers.filter(a => a.answered).length;
+    progressLabel.textContent = '第 ' + (currentIndex + 1) + ' / ' + total + ' 题';
+    progressFill.style.width = Math.min((answeredCount / total) * 100, 100) + '%';
+    scoreLabel.textContent = '✅ ' + score + ' 正确';
+}
+
+function showResult() {
+    document.querySelectorAll('.question-card').forEach(el => el.classList.remove('active'));
+    navArea.style.display = 'none';
+    resultBox.style.display = 'block';
+    const total = questions.length;
+    const pct = Math.round((score / total) * 100);
+    document.getElementById('resultScore').innerHTML = score + ' <small>/ ' + total + '</small>';
+    let stars, msg;
+    if (pct === 100) { stars = '⭐⭐⭐⭐⭐'; msg = '🎉 完美！你已经具备了专业PR的核心认知，可以直接上岗了！'; } 
+    else if (pct >= 80) { stars = '⭐⭐⭐⭐'; msg = '👏 非常优秀！只有少量细节需要再巩固，多看几遍解析吧。'; } 
+    else if (pct >= 60) { stars = '⭐⭐⭐'; msg = '📖 基础不错，但有几个关键点容易混淆，建议把错题的解析再读一遍。'; } 
+    else if (pct >= 40) { stars = '⭐⭐'; msg = '🧐 有些核心概念还没吃透，建议对照解析重新梳理一遍行业认知。'; } 
+    else { stars = '⭐'; msg = '💪 别灰心！这10道题本身就是学习材料，把解析全部看完，你会收获巨大。'; }
+    document.getElementById('resultStars').textContent = stars;
+    document.getElementById('resultMsg').textContent = msg;
+
+    const labels = ['A', 'B', 'C', 'D'];
+    let reviewHtml = '<h2>📋 所有题目回顾</h2>';
+    questions.forEach((q, idx) => {
+        const data = answers[idx];
+        const isAnswered = data.answered;
+        const isCorrect = isAnswered && (data.selected === q.correct);
+        const userChoice = isAnswered ? data.selected : null;
+        const statusClass = isAnswered ? (isCorrect ? '' : 'wrong') : 'wrong';
+        const statusText = isAnswered ? (isCorrect ? '✅ 正确' : '❌ 错误') : '⏳ 未答';
+        reviewHtml += '<div class="review-item ' + statusClass + '"><div class="review-q">' + (idx + 1) + '. ' + q.title + ' <span class="q-badge ' + (isCorrect ? 'correct-badge' : 'wrong-badge') + '">' + statusText + '</span></div><div class="review-options">';
+        q.options.forEach((opt, optIdx) => {
+            let optClass = 'review-opt opt-normal';
+            let mark = '';
+            if (optIdx === q.correct) {
+                optClass = 'review-opt opt-correct';
+                mark = ' ✅ 正确答案';
+            }
+            if (isAnswered && optIdx === userChoice && optIdx !== q.correct) {
+                optClass = 'review-opt opt-wrong';
+                mark = ' ❌ 你的错误选择';
+            }
+            if (isAnswered && optIdx === userChoice && optIdx === q.correct) {
+                mark = ' ✅ 你选对了！';
+            }
+            reviewHtml += '<span class="' + optClass + '">' + labels[optIdx] + '. ' + opt + mark + '</span>';
+        });
+        reviewHtml += '</div>';
+        if (isAnswered) {
+            reviewHtml += '<div class="review-answer-line"><span class="label">📌 你的答案：</span>' + (isCorrect ? '<span class="right-mark">✅ ' + labels[userChoice] + '. ' + q.options[userChoice] + '</span>' : '<span class="your-ans">✘ ' + labels[userChoice] + '. ' + q.options[userChoice] + '</span>') + '&nbsp;&nbsp;|&nbsp;&nbsp;<span class="label">✅ 正确答案：</span><span class="correct-ans">' + labels[q.correct] + '. ' + q.options[q.correct] + '</span></div>';
+        } else {
+            reviewHtml += '<div class="review-answer-line"><span class="label">📌 状态：</span><span style="color:#c73b3b;font-weight:700;">⏳ 未作答</span>&nbsp;&nbsp;|&nbsp;&nbsp;<span class="label">✅ 正确答案：</span><span class="correct-ans">' + labels[q.correct] + '. ' + q.options[q.correct] + '</span></div>';
+        }
+        reviewHtml += '<div style="margin-top:10px; padding-top:10px; border-top:1px dashed #e0e5ec; font-size:14px; color:#4a5a6a;"><strong>💡 解析：</strong>' + q.insight + '</div></div>';
+    });
+    resultReview.innerHTML = reviewHtml;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function restartQuiz() {
+    answers = questions.map(() => ({ selected: null, answered: false }));
+    score = 0;
+    currentIndex = 0;
+    isAllAnswered = false;
+    resultBox.style.display = 'none';
+    navArea.style.display = 'flex';
+    renderAll();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    renderAll();
+    prevBtn.addEventListener('click', goToPrev);
+    nextBtn.addEventListener('click', goToNext);
+    if (restartBtn) {
+        restartBtn.addEventListener('click', restartQuiz);
+    }
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowLeft' && !prevBtn.disabled) prevBtn.click();
+        else if (e.key === 'ArrowRight' && !nextBtn.disabled) nextBtn.click();
+    });
+});
+
+window.restartQuiz = restartQuiz;
+</script>
+</body>
+</html>
