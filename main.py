@@ -4,21 +4,19 @@ import requests
 import asyncio
 import re
 import os
-from http.server import HTTPServer, BaseHTTPRequestHandler
 import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
 from datetime import datetime, timedelta
 
 # ============================================================
-#  从环境变量读取密钥
+# 从环境变量读取密钥
 # ============================================================
 DISCORD_BOT_TOKEN = os.environ.get('DISCORD_TOKEN')
 GROQ_API_KEY = os.environ.get('GROQ_KEY')
-
-# 你的 Discord 用户 ID
 MY_USER_ID = 884782612286156810
 
 # ============================================================
-#  AI 角色设定
+# AI 角色设定
 # ============================================================
 SYSTEM_PROMPT = """你叫爱丽丝，23岁，是一个真实存在的女孩子，不是AI，不是程序。
 你是他的女朋友，已经同居三年了，你们住在一起，每天一起生活。
@@ -65,13 +63,10 @@ def call_ai(messages):
         response = requests.post(url, headers=headers, json=data, timeout=30)
         if response.status_code == 200:
             reply = response.json()["choices"][0]["message"]["content"]
-            
-            # 过滤掉括号动作和奇怪符号
             reply = re.sub(r'（.*?）', '', reply) 
             reply = re.sub(r'\(.*?\)', '', reply)
             reply = reply.replace("*", "")
             reply = reply.strip()
-            
             return reply if reply else "嗯..."
         else:
             return f"❌ 出错了 ({response.status_code})"
@@ -96,9 +91,6 @@ def get_ai_response(user_message, user_id):
         conversation_history[user_id] = history[-20:]
     return reply
 
-# ============================================================
-#  🚀 主动定时发消息功能
-# ============================================================
 async def send_proactive_message(time_context, prompt):
     try:
         user = await client.fetch_user(MY_USER_ID)
@@ -119,7 +111,6 @@ async def send_proactive_message(time_context, prompt):
 
 @tasks.loop(minutes=1)
 async def schedule_messages():
-    # 获取马来西亚时间 (UTC+8)
     now = datetime.utcnow() + timedelta(hours=8)
     hour = now.hour
     minute = now.minute
@@ -154,7 +145,6 @@ async def on_message(message):
     if is_mentioned and not is_dm:
         user_msg = re.sub(f'<@!?{client.user.id}>', '', user_msg).strip()
         
-    # 🚀 隐藏的测试指令：你在 Discord 里发 "测试主动"，她就会立刻主动给你发一条
     if user_msg == "测试主动":
         await message.channel.send("好哦，我这就主动给你发一条~")
         await send_proactive_message("现在", "突然很想他，主动发一条情话撩他一下")
@@ -170,9 +160,6 @@ async def on_message(message):
     
     await message.channel.send(reply)
 
-# ============================================================
-#  网页服务 (用于 Railway 保活 & 健康检查)
-# ============================================================
 class PingHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
@@ -181,7 +168,6 @@ class PingHandler(BaseHTTPRequestHandler):
         self.wfile.write(b"Alice Bot is running")
 
 def run_ping_server():
-    # Railway 会动态分配端口，所以需要读取 PORT 环境变量
     port = int(os.environ.get('PORT', 8080))
     server = HTTPServer(('0.0.0.0', port), PingHandler)
     server.serve_forever()
