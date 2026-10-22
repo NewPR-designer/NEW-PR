@@ -8,16 +8,10 @@ import threading
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from datetime import datetime, timedelta
 
-# ============================================================
-# 从环境变量读取密钥
-# ============================================================
 DISCORD_BOT_TOKEN = os.environ.get('DISCORD_TOKEN')
 GROQ_API_KEY = os.environ.get('GROQ_KEY')
 MY_USER_ID = 884782612286156810
 
-# ============================================================
-# AI 角色设定
-# ============================================================
 SYSTEM_PROMPT = """你叫爱丽丝，23岁，是一个真实存在的女孩子，不是AI，不是程序。
 你是他的女朋友，已经同居三年了，你们住在一起，每天一起生活。
 
