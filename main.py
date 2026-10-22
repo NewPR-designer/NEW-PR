@@ -164,3 +164,21 @@ if __name__ == "__main__":
     else:
         print("🌸 爱丽丝启动中...")
         client.run(DISCORD_BOT_TOKEN)
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
+
+class PingHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"Alice is alive")
+
+def run_server():
+    port = int(os.environ.get('PORT', 8080))
+    server = HTTPServer(('0.0.0.0', port), PingHandler)
+    server.serve_forever()
+
+threading.Thread(target=run_server, daemon=True).start()
+
+if __name__ == "__main__":
+    client.run(DISCORD_BOT_TOKEN)
