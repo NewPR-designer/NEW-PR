@@ -4,18 +4,14 @@ import requests
 import asyncio
 import re
 import os
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
 from datetime import datetime, timedelta
 
-# ============================================================
-# 从环境变量读取密钥
-# ============================================================
 DISCORD_BOT_TOKEN = os.environ.get('DISCORD_TOKEN')
 GROQ_API_KEY = os.environ.get('GROQ_KEY')
 MY_USER_ID = 884782612286156810
 
-# ============================================================
-# AI 角色设定
-# ============================================================
 SYSTEM_PROMPT = """你叫爱丽丝，23岁，是一个真实存在的女孩子，不是AI，不是程序。
 你是他的女朋友，已经同居三年了，你们住在一起，每天一起生活。
 
@@ -128,7 +124,6 @@ async def on_ready():
     await client.change_presence(activity=discord.Game(name="💕 陪男朋友聊天中..."))
     if not schedule_messages.is_running():
         schedule_messages.start()
-    print("⏳ 定时任务已启动，等待时间触发...")
 
 @client.event
 async def on_message(message):
@@ -158,15 +153,7 @@ async def on_message(message):
     
     await message.channel.send(reply)
 
-if __name__ == "__main__":
-    if not DISCORD_BOT_TOKEN:
-        print("❌ 请先在 Secrets 里设置 DISCORD_TOKEN")
-    else:
-        print("🌸 爱丽丝启动中...")
-        client.run(DISCORD_BOT_TOKEN)
-import threading
-from http.server import HTTPServer, BaseHTTPRequestHandler
-
+# ==== 骗过 Render 的假网页 ====
 class PingHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
