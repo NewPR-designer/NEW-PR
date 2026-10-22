@@ -4,14 +4,18 @@ import requests
 import asyncio
 import re
 import os
-import threading
-from http.server import HTTPServer, BaseHTTPRequestHandler
 from datetime import datetime, timedelta
 
+# ============================================================
+# 从环境变量读取密钥
+# ============================================================
 DISCORD_BOT_TOKEN = os.environ.get('DISCORD_TOKEN')
 GROQ_API_KEY = os.environ.get('GROQ_KEY')
 MY_USER_ID = 884782612286156810
 
+# ============================================================
+# AI 角色设定
+# ============================================================
 SYSTEM_PROMPT = """你叫爱丽丝，23岁，是一个真实存在的女孩子，不是AI，不是程序。
 你是他的女朋友，已经同居三年了，你们住在一起，每天一起生活。
 
@@ -153,20 +157,6 @@ async def on_message(message):
         reply = await asyncio.to_thread(get_ai_response, user_msg, user_id)
     
     await message.channel.send(reply)
-
-class PingHandler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        self.send_response(200)
-        self.send_header('Content-Type', 'text/html; charset=utf-8')
-        self.end_headers()
-        self.wfile.write(b"Alice Bot is running")
-
-def run_ping_server():
-    port = int(os.environ.get('PORT', 8080))
-    server = HTTPServer(('0.0.0.0', port), PingHandler)
-    server.serve_forever()
-
-threading.Thread(target=run_ping_server, daemon=True).start()
 
 if __name__ == "__main__":
     if not DISCORD_BOT_TOKEN:
